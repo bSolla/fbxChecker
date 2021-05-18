@@ -1,0 +1,8 @@
+﻿  fbxChecker.cpp
+libfbxsdk-md.lib(fbxutils.obj) : warning LNK4099: PDB 'libfbxsdk-md.pdb' was not found with 'libfbxsdk-md.lib(fbxutils.obj)' or at 'C:\Users\Len\Documents\clase\2o cuatri\UAJ\fbxChecker\fbxChecker\Debug\libfbxsdk-md.pdb'; linking object as if no debug info
+libfbxsdk-md.lib(fbxstring.obj) : warning LNK4099: PDB 'libfbxsdk-md.pdb' was not found with 'libfbxsdk-md.lib(fbxstring.obj)' or at 'C:\Users\Len\Documents\clase\2o cuatri\UAJ\fbxChecker\fbxChecker\Debug\libfbxsdk-md.pdb'; linking object as if no debug info
+libfbxsdk-md.lib(fbxstatus.obj) : warning LNK4099: PDB '' was not found with 'libfbxsdk-md.lib(fbxstatus.obj)' or at ''; linking object as if no debug info
+libfbxsdk-md.lib(fbxfolder.obj) : warning LNK4099: PDB 'libfbxsdk-md.pdb' was not found with 'libfbxsdk-md.lib(fbxfolder.obj)' or at 'C:\Users\Len\Documents\clase\2o cuatri\UAJ\fbxChecker\fbxChecker\Debug\libfbxsdk-md.pdb'; linking object as if no debug info
+libfbxsdk-md.lib(fbxdebug.obj) : warning LNK4099: PDB 'libfbxsdk-md.pdb' was not found with 'libfbxsdk-md.lib(fbxdebug.obj)' or at 'C:\Users\Len\Documents\clase\2o cuatri\UAJ\fbxChecker\fbxChecker\Debug\libfbxsdk-md.pdb'; linking object as if no debug info
+libfbxsdk-md.lib(fbxalloc.obj) : warning LNK4099: PDB 'libfbxsdk-md.pdb' was not found with 'libfbxsdk-md.lib(fbxalloc.obj)' or at 'C:\Users\Len\Documents\clase\2o cuatri\UAJ\fbxChecker\fbxChecker\Debug\libfbxsdk-md.pdb'; linking object as if no debug info
+  fbxChecker.vcxproj -> C:\Users\Len\Documents\clase\2o cuatri\UAJ\fbxChecker\fbxChecker\Debug\fbxChecker.exe
