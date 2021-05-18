@@ -93,8 +93,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2020.2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>\vs2019\x86\debug\libfbxsdk-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2020.2\lib;C:\Program Files\Autodesk\FBX\FBX SDK\2020.2\lib\vs2019\x86\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>wininet.lib;C:\Program Files\Autodesk\FBX\FBX SDK\2020.2\lib\vs2019\x86\debug\libfbxsdk-md.lib;C:\Program Files\Autodesk\FBX\FBX SDK\2020.2\lib\vs2019\x86\debug\libxml2-md.lib;C:\Program Files\Autodesk\FBX\FBX SDK\2020.2\lib\vs2019\x86\debug\zlib-md.lib;C:\Program Files\Autodesk\FBX\FBX SDK\2020.2\lib\vs2019\x86\debug\libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
