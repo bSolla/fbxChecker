@@ -144,6 +144,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="fbxChecker.cpp" />
+    <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Reader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Menu.h" />
+    <ClInclude Include="Reader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
