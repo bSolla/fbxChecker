@@ -76,6 +76,19 @@ void Reader::PrintNode(FbxNode* pNode)
         rotation[0], rotation[1], rotation[2],
         scaling[0], scaling[1], scaling[2]
     );
+    if (scaling[0] == scaling[1] == scaling[2] == 1)
+    {
+        printf("OK\n");
+    }
+    else if (scaling[0] == scaling[1] ==scaling[2] )
+    {
+        printf("Warning\n");
+    }
+    else
+    {
+        printf("Needs Fixing\n");
+    }
+  
     numTabs++;
 
     for (int i = 0; i < pNode->GetNodeAttributeCount(); i++)
@@ -98,6 +111,13 @@ void Reader::PrintAttribute(FbxNodeAttribute* pAttribute)
     PrintTabs();
     
     printf("<attribute type='%s' name='%s'/>\n", typeName.Buffer(), attrName.Buffer());
+
+    if (typeName =="camera" || typeName == "light")
+    {
+        printf("Needs Fixing\n");
+        printf("\n");
+    
+    }
 }
 
 void Reader::PrintTabs()

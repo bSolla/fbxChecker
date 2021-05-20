@@ -1,2 +1,12 @@
 ﻿  Reader.cpp
+D:\Uni\UsabilidadYAnalisis\Proyecto\fbxChecker\fbxChecker\fbxChecker\Reader.cpp(79,8): warning C4805: '==': combinación no segura del tipo 'bool' y el tipo 'T' en la operación
+          with
+          [
+              T=fbxsdk::FbxDouble
+          ]
+D:\Uni\UsabilidadYAnalisis\Proyecto\fbxChecker\fbxChecker\fbxChecker\Reader.cpp(83,52): warning C4805: '==': combinación no segura del tipo 'bool' y el tipo 'T' en la operación
+          with
+          [
+              T=fbxsdk::FbxDouble
+          ]
   fbxChecker.vcxproj -> D:\Uni\UsabilidadYAnalisis\Proyecto\fbxChecker\fbxChecker\Debug\fbxChecker.exe
