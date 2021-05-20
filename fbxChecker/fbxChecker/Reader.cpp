@@ -1,4 +1,5 @@
 #include "Reader.h"
+#include <iostream>
 
 FbxString GetAttributeTypeName(FbxNodeAttribute::EType type) {
     switch (type) {
@@ -58,10 +59,44 @@ void Reader::printNodesScene()
 {
     FbxNode* lRootNode = lScene->GetRootNode();
     if (lRootNode) {
-        for (int i = 0; i < lRootNode->GetChildCount(); i++)
+        for (int i = 0; i < lRootNode->GetChildCount(); i++) {
             PrintNode(lRootNode->GetChild(i));
+            checkScaling(lRootNode->GetChild(i));
+        }
     }
 }
+
+void Reader::checkScaling(FbxNode* pNode)
+{
+    const char* nodeName = pNode->GetName();
+    FbxDouble3 scaling = pNode->LclScaling.Get();
+
+    // Check if the scale is equal in all axis
+    if (scaling[0] == scaling[1] == scaling[2]) {
+
+        // Scale is equal to 1
+        if (scaling[0] == 1 && scaling[1] == 1 && scaling[2] == 1) {
+            std::cout << nodeName << ":\tOK\n";
+        }
+        else {
+            std::cout << nodeName << ":\tWarning: Scale is equal in all axis but differs from unit\n";
+            return;
+        }
+    }
+    else
+    {
+        std::cout << nodeName << ":\tNeeds Fixing: Scale is different in axis\n";
+        return;
+    }
+
+
+    // Recursively checks all childs scaling
+    for (int i = 0; i < pNode->GetChildCount(); i++) {
+        checkScaling(pNode->GetChild(i));
+    }
+
+}
+
 void Reader::PrintNode(FbxNode* pNode)
 {
     PrintTabs();
@@ -76,18 +111,6 @@ void Reader::PrintNode(FbxNode* pNode)
         rotation[0], rotation[1], rotation[2],
         scaling[0], scaling[1], scaling[2]
     );
-    if (scaling[0] == scaling[1] == scaling[2] == 1)
-    {
-        printf("OK\n");
-    }
-    else if (scaling[0] == scaling[1] ==scaling[2] )
-    {
-        printf("Warning\n");
-    }
-    else
-    {
-        printf("Needs Fixing\n");
-    }
   
     numTabs++;
 

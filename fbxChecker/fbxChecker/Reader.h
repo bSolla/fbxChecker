@@ -12,7 +12,9 @@ public:
 	bool correctFile(const char* filenmame);
 
 	void printNodesScene();
+
 private:
+	void checkScaling(FbxNode* pNode);
 	void PrintNode(FbxNode* pNode);
 	void PrintAttribute(FbxNodeAttribute* pAttribute);
 	void PrintTabs();
