@@ -13,6 +13,9 @@ public:
 
 	void printNodesScene();
 
+	//clean and reset the scene
+	void clear();
+
 private:
 	void checkScaling(FbxNode* pNode);
 	void PrintNode(FbxNode* pNode);

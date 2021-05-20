@@ -66,6 +66,18 @@ void Reader::printNodesScene()
     }
 }
 
+void Reader::clear()
+{
+    lSdkManager = nullptr;
+    lImporter = nullptr;
+    lScene = nullptr;
+
+    lSdkManager = FbxManager::Create();
+    FbxIOSettings* ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
+    lSdkManager->SetIOSettings(ios);
+    lImporter = FbxImporter::Create(lSdkManager, "");
+}
+
 void Reader::checkScaling(FbxNode* pNode)
 {
     const char* nodeName = pNode->GetName();
