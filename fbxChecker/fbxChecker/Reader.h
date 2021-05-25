@@ -19,6 +19,7 @@ public:
 private:
 	void checkScaling(FbxNode* pNode);
 	void checkTranslation(FbxNode* pNode);
+	void checkRotation(FbxNode* pNode);
 	void PrintNode(FbxNode* pNode);
 	void PrintAttribute(FbxNodeAttribute* pAttribute);
 	void PrintTabs();

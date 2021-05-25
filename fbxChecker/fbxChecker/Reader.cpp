@@ -61,11 +61,6 @@ void Reader::printNodesScene()
     if (lRootNode) {
         for (int i = 0; i < lRootNode->GetChildCount(); i++) {
             PrintNode(lRootNode->GetChild(i));
-            std::cout << "\n-Checking Scale\n";
-            checkScaling(lRootNode->GetChild(i));
-            std::cout << "\n-Checking Translation\n";
-            checkTranslation(lRootNode->GetChild(i));
-            std::cout << "\n";
         }
     }
 }
@@ -88,7 +83,7 @@ void Reader::checkScaling(FbxNode* pNode)
     FbxDouble3 scaling = pNode->LclScaling.Get();
 
     // Check if the scale is equal in all axis
-    if (scaling[0] == scaling[1] == scaling[2]) {
+    if (scaling[0] == scaling[1] && scaling[0] == scaling[2]) {
 
         // Scale is equal to 1
         if (scaling[0] == 1 && scaling[1] == 1 && scaling[2] == 1) {
@@ -104,13 +99,6 @@ void Reader::checkScaling(FbxNode* pNode)
         std::cout << nodeName << ":\tNeeds Fixing: Scale is different in axis\n";
         return;
     }
-
-
-    // Recursively checks all childs scaling
-    for (int i = 0; i < pNode->GetChildCount(); i++) {
-        checkScaling(pNode->GetChild(i));
-    }
-
 }
 
 void Reader::checkTranslation(FbxNode* pNode)
@@ -125,10 +113,18 @@ void Reader::checkTranslation(FbxNode* pNode)
     {
         std::cout << nodeName << ":\tWarning: Translation is not equal to zero= (" << translation[0] << ", " << translation[1] << ", " << translation[2] << ")\n";
     }
+}
 
+void Reader::checkRotation(FbxNode* pNode)
+{
+    FbxDouble3 rotation = pNode->LclRotation.Get();
+    const char* nodeName = pNode->GetName();
 
-    for (int i = 0; i < pNode->GetChildCount(); i++) {
-        checkTranslation(pNode->GetChild(i));
+    if (abs(rotation[0] - rotation[1]) < 0.01 && abs(rotation[0] - rotation[2]) < 0.01) {
+        std::cout << nodeName << ":\tOK\n";
+    }
+    else {
+        std::cout << nodeName << ":\tWarning: Rotation is different in some axis= (" << rotation[0] << ", " << rotation[1] << ", " << rotation[2] << ")\n";
     }
 }
 
@@ -149,11 +145,23 @@ void Reader::PrintNode(FbxNode* pNode)
   
     numTabs++;
 
+    std::cout << "\n-Checking Translation\n";
+    checkTranslation(pNode);
+    std::cout << "\n-Checking Scale\n";
+    checkScaling(pNode);
+    std::cout << "\n-Checking Rotation\n";
+    checkRotation(pNode);
+
     for (int i = 0; i < pNode->GetNodeAttributeCount(); i++)
         PrintAttribute(pNode->GetNodeAttributeByIndex(i));
 
     for (int j = 0; j < pNode->GetChildCount(); j++)
+    {
         PrintNode(pNode->GetChild(j));
+        checkTranslation(pNode->GetChild(j));
+        checkScaling(pNode->GetChild(j));
+        checkRotation(pNode->GetChild(j));
+    }
 
     numTabs--;
     PrintTabs();
