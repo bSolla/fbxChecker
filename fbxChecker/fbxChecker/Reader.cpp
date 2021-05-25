@@ -61,7 +61,11 @@ void Reader::printNodesScene()
     if (lRootNode) {
         for (int i = 0; i < lRootNode->GetChildCount(); i++) {
             PrintNode(lRootNode->GetChild(i));
+            std::cout << "\n-Checking Scale\n";
             checkScaling(lRootNode->GetChild(i));
+            std::cout << "\n-Checking Translation\n";
+            checkTranslation(lRootNode->GetChild(i));
+            std::cout << "\n";
         }
     }
 }
@@ -107,6 +111,25 @@ void Reader::checkScaling(FbxNode* pNode)
         checkScaling(pNode->GetChild(i));
     }
 
+}
+
+void Reader::checkTranslation(FbxNode* pNode)
+{
+    const char* nodeName = pNode->GetName();
+    FbxDouble3 translation = pNode->LclTranslation.Get();
+
+    if (translation[0] == 0 && translation[1] == 0 && translation[2] == 0) {
+        std::cout << nodeName << ":\tOK\n";
+    }
+    else
+    {
+        std::cout << nodeName << ":\tWarning: Translation is not equal to zero= (" << translation[0] << ", " << translation[1] << ", " << translation[2] << ")\n";
+    }
+
+
+    for (int i = 0; i < pNode->GetChildCount(); i++) {
+        checkTranslation(pNode->GetChild(i));
+    }
 }
 
 void Reader::PrintNode(FbxNode* pNode)
