@@ -1,5 +1,9 @@
 #include "Reader.h"
 #include <iostream>
+#include <filesystem>
+#include <fstream>
+//C++17
+namespace fs = std::filesystem;
 
 FbxString GetAttributeTypeName(FbxNodeAttribute::EType type) {
     switch (type) {
@@ -59,9 +63,21 @@ void Reader::printNodesScene()
 {
     FbxNode* lRootNode = lScene->GetRootNode();
     if (lRootNode) {
+
+        badName = true;
+        goodName = true;
+
         for (int i = 0; i < lRootNode->GetChildCount(); i++) {
             PrintNode(lRootNode->GetChild(i));
         }
+
+        std::cout << "\n-Final name check\n";
+        if (badName)
+            std::cout << lRootNode->GetName() << " child names:\tNeeds Fixing: all the node's names are bad \n";
+        else if (goodName)
+            std::cout << lRootNode->GetName() << " child names:\tOK\n";
+        else
+            std::cout << lRootNode->GetName() << " child names:\tWarning: some names are names are bad \n";
     }
 }
 
@@ -128,6 +144,48 @@ void Reader::checkRotation(FbxNode* pNode)
     }
 }
 
+void Reader::checkName(const char* nNode)
+{
+    //We use this as a string because is more easy :D
+    std::string name = nNode, util;
+    //if the stack is empty read the text and 
+    if (badNamesStack.empty())
+    {
+        char textChain[128];
+        std::ifstream fe(fs::current_path().root_name().string() + "BadNames.txt");
+        if (fe.is_open())
+        {
+            while (!fe.eof())
+            {
+                fe >> util;
+                badNamesStack.push(util);
+            }
+            fe.close();
+        }
+    }
+    //Save the stack in other, we dont need to read the file 
+    //more than one time
+    std::stack<std::string> saveStack;
+    bool actualBadName = false;
+    while (!badNamesStack.empty() && !actualBadName) {
+        if (name.find(badNamesStack.top()) != std::string::npos) {
+            std::cout << name << ":\tWarning: Bad name, please change it \n";
+            goodName = false;
+            actualBadName = true;
+        }
+        saveStack.push(badNamesStack.top());
+        badNamesStack.pop();
+    }
+    if (!actualBadName) {
+        std::cout << name << ":\tGood name \n";
+        badName = false;
+    }
+    while (!saveStack.empty()) {
+        badNamesStack.push(saveStack.top());
+        saveStack.pop();
+    }
+}
+
 void Reader::PrintNode(FbxNode* pNode)
 {
     PrintTabs();
@@ -151,9 +209,8 @@ void Reader::PrintNode(FbxNode* pNode)
     checkScaling(pNode);
     std::cout << "\n-Checking Rotation\n";
     checkRotation(pNode);
-
-    for (int i = 0; i < pNode->GetNodeAttributeCount(); i++)
-        PrintAttribute(pNode->GetNodeAttributeByIndex(i));
+    std::cout << "\n-Checking Name\n";
+    checkName(pNode->GetName());
 
     for (int j = 0; j < pNode->GetChildCount(); j++)
     {
@@ -161,8 +218,11 @@ void Reader::PrintNode(FbxNode* pNode)
         checkTranslation(pNode->GetChild(j));
         checkScaling(pNode->GetChild(j));
         checkRotation(pNode->GetChild(j));
+        checkName(pNode->GetChild(j)->GetName());
     }
 
+    for (int i = 0; i < pNode->GetNodeAttributeCount(); i++)
+        PrintAttribute(pNode->GetNodeAttributeByIndex(i));
     numTabs--;
     PrintTabs();
     printf("</node>\n");
@@ -191,5 +251,3 @@ void Reader::PrintTabs()
     for (int i = 0; i < numTabs; i++)
         printf("\t");
 }
-
-

@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <fbxsdk.h>
-
+#include <stack>
 
 class Reader
 {
@@ -21,6 +21,7 @@ private:
 	void checkTranslation(FbxNode* pNode);
 	void checkRotation(FbxNode* pNode);
 	void PrintNode(FbxNode* pNode);
+	void checkName(const char* nNode);
 	void PrintAttribute(FbxNodeAttribute* pAttribute);
 	void PrintTabs();
 
@@ -28,5 +29,9 @@ private:
 	FbxManager* lSdkManager;
 	FbxImporter* lImporter;
 	FbxScene* lScene;
+
+	//Check Names utils
+	bool badName = false, goodName = true;
+	std::stack<std::string> badNamesStack;
 };
 

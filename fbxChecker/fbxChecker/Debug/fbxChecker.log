@@ -1,2 +1,3 @@
 ﻿  Reader.cpp
-  fbxChecker.vcxproj -> C:\Users\Álvaro.PC-ALVARO\OneDrive\Documentos\Alvaro\Apuntes Uni\UAJ\fbxChecker\fbxChecker\Debug\fbxChecker.exe
+C:\Users\pablo\OneDrive\Escritorio\Clase\UAV\fbxChecker\fbxChecker\fbxChecker\Reader.cpp(154,14): warning C4101: 'textChain': variable local sin referencia
+  fbxChecker.vcxproj -> C:\Users\pablo\OneDrive\Escritorio\Clase\UAV\fbxChecker\fbxChecker\Debug\fbxChecker.exe
