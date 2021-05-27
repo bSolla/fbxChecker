@@ -43,7 +43,7 @@ void Menu::init()
 
 		//Reader routine
 		if (r->correctFile(s.top().c_str())) {
-			r->printNodesScene();
+			r->processScene();
 			r->clear();
 		}
 

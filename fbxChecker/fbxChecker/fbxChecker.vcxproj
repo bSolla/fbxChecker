@@ -144,11 +144,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="fbxChecker.cpp" />
+    <ClCompile Include="Checks.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Reader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Checks.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Reader.h" />
   </ItemGroup>
