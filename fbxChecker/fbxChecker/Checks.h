@@ -11,11 +11,12 @@ private:
 	int numTabs = 0;
 
 public:
-	void checkAttributes(FbxNodeAttribute* attribute);
+	bool checkAttributes(FbxNode* node);
 	void checkScaling(FbxNode* node);
 	void checkTranslation(FbxNode* node);
 	void checkRotation(FbxNode* node);
 	void checkName(const char* node);
+	void checkNgons(FbxNode* node);
 	void completeCheck(FbxScene* scene);
 
 private:

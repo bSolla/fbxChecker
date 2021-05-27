@@ -1,7 +1,3 @@
 ﻿  Checks.cpp
-C:\Users\Len\Documents\clase\2o cuatri\UAJ\fbxChecker\fbxChecker\fbxChecker\Checks.cpp(103,14): warning C4101: 'textChain': unreferenced local variable
-  Menu.cpp
-  Reader.cpp
-  main.cpp
-  Generating Code...
+C:\Users\Len\Documents\clase\2o cuatri\UAJ\fbxChecker\fbxChecker\fbxChecker\Checks.cpp(118,14): warning C4101: 'textChain': unreferenced local variable
   fbxChecker.vcxproj -> C:\Users\Len\Documents\clase\2o cuatri\UAJ\fbxChecker\fbxChecker\Debug\fbxChecker.exe

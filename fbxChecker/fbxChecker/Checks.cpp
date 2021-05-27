@@ -32,20 +32,36 @@ FbxString GetAttributeTypeName(FbxNodeAttribute::EType type) {
 }
 
 
-void Checks::checkAttributes(FbxNodeAttribute* pAttribute) {
-    if (!pAttribute) return;
+bool Checks::checkAttributes(FbxNode* node) {
+    bool isMesh = true; 
 
-    FbxString typeName = GetAttributeTypeName(pAttribute->GetAttributeType());
-    FbxString attrName = pAttribute->GetName();
-    printTabs();
+    for (int i = 0; i < node->GetNodeAttributeCount(); i++) {
+        FbxNodeAttribute* attribute = node->GetNodeAttributeByIndex(i);
+        FbxString typeName = GetAttributeTypeName(attribute->GetAttributeType());
+        FbxString attrName = attribute->GetName();
+        printTabs();
 
-    printf("<attribute type='%s' name='%s'/>\n", typeName.Buffer(), attrName.Buffer());
+        //printf("<attribute type='%s' name='%s'/>\n", typeName.Buffer(), attrName.Buffer());
 
-    if (typeName == "camera" || typeName == "light") {
-        printf("Needs Fixing\n");
-        printf("\n");
-
+        if (typeName == "camera" || typeName == "light") {
+            /*printf("Needs Fixing\n");
+            printf("\n");*/
+            isMesh = false;
+            break;
+        }
     }
+
+    // TODO: fix this for child nodes too
+    for (int j = 0; j < node->GetChildCount(); j++) {
+        isMesh &= checkAttributes(node->GetChild(j));
+    }
+
+    if (isMesh)
+        std::cout << "OK: object does not contain lights\n";
+    else
+        std::cout << "Needs Fixing: object contains a light and/or camera\n";
+
+    return isMesh;
 }
 
 void Checks::checkScaling(FbxNode* pNode) {
@@ -133,6 +149,35 @@ void Checks::checkName(const char* nNode) {
     }
 }
 
+void Checks::checkNgons(FbxNode* node) {
+    // stores max number of vertices in poly
+    int maxVertices = 0;
+
+    //get mesh
+    FbxMesh* mesh = node->GetMesh();
+
+    if (mesh) {
+        // check for polygon size 
+        for (int polyIndex = 0; polyIndex < mesh->GetPolygonCount(); polyIndex++) {
+            //get polygon size and if it's bigger than the stored one, replace
+            (mesh->GetPolygonSize(polyIndex) > maxVertices) ? 
+                maxVertices = mesh->GetPolygonSize(polyIndex) : maxVertices;
+        }
+    } // if (mesh)
+
+    switch (maxVertices) {
+    case 3:
+        std::cout << "OK: every polygon is a tri\n";
+        break;
+    case 4:
+        std::cout << "Warning: some quads present\n";
+        break;
+    default:
+        std::cout << "Needs fixing: there are N-gons in the mesh\n";
+        break;
+    }
+}
+
 void Checks::completeCheck(FbxScene* scene) {
     FbxNode* rootNode = scene->GetRootNode();
     if (rootNode) {
@@ -171,25 +216,31 @@ void Checks::processNode(FbxNode* node) {
 
     numTabs++;
 
-    std::cout << "\n-Checking Translation\n";
-    checkTranslation(node);
-    std::cout << "\n-Checking Scale\n";
-    checkScaling(node);
-    std::cout << "\n-Checking Rotation\n";
-    checkRotation(node);
-    std::cout << "\n-Checking Name\n";
-    checkName(node->GetName());
+    bool isMesh = true; //true to be able to use logic & on itself
 
-    for (int j = 0; j < node->GetChildCount(); j++) {
-        processNode(node->GetChild(j));
-        checkTranslation(node->GetChild(j));
-        checkScaling(node->GetChild(j));
-        checkRotation(node->GetChild(j));
-        checkName(node->GetChild(j)->GetName());
+    isMesh = checkAttributes(node);
+
+    if (isMesh && node->GetNodeAttributeCount() != 0) {
+        std::cout << "\n-Checking Translation\n";
+        checkTranslation(node);
+        std::cout << "\n-Checking Scale\n";
+        checkScaling(node);
+        std::cout << "\n-Checking Rotation\n";
+        checkRotation(node);
+        std::cout << "\n-Checking Name\n";
+        checkName(node->GetName());
+        std::cout << "\n-Checking N-gons\n";
+        checkNgons(node);
+
+        for (int j = 0; j < node->GetChildCount(); j++) {
+            processNode(node->GetChild(j));
+            checkTranslation(node->GetChild(j));
+            checkScaling(node->GetChild(j));
+            checkRotation(node->GetChild(j));
+            checkName(node->GetChild(j)->GetName());
+            checkNgons(node);
+        }
     }
-
-    for (int i = 0; i < node->GetNodeAttributeCount(); i++)
-        checkAttributes(node->GetNodeAttributeByIndex(i));
 
     numTabs--;
     printTabs();
