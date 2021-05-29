@@ -41,11 +41,7 @@ bool Checks::checkAttributes(FbxNode* node) {
         FbxString attrName = attribute->GetName();
         printTabs();
 
-        //printf("<attribute type='%s' name='%s'/>\n", typeName.Buffer(), attrName.Buffer());
-
         if (typeName == "camera" || typeName == "light") {
-            /*printf("Needs Fixing\n");
-            printf("\n");*/
             isMesh = false;
             break;
         }
@@ -150,6 +146,7 @@ void Checks::checkName(const char* nNode) {
 }
 
 void Checks::checkNgons(FbxNode* node) {
+    const char* nodeName = node->GetName();
     // stores max number of vertices in poly
     int maxVertices = 0;
 
@@ -167,14 +164,32 @@ void Checks::checkNgons(FbxNode* node) {
 
     switch (maxVertices) {
     case 3:
-        std::cout << "OK: every polygon is a tri\n";
+        std::cout << nodeName << "\tOK: every polygon is a tri\n";
         break;
     case 4:
-        std::cout << "Warning: some quads present\n";
+        std::cout << nodeName << "\tWarning: some quads present\n";
         break;
     default:
-        std::cout << "Needs fixing: there are N-gons in the mesh\n";
+        std::cout << nodeName << "\tNeeds fixing: there are N-gons in the mesh\n";
         break;
+    }
+}
+
+void Checks::checkNormals(FbxNode* node) {
+    const char* nodeName = node->GetName();
+
+    //get mesh
+    FbxMesh* mesh = node->GetMesh();
+
+    if (mesh) {
+        FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
+
+        if (normalElement) {
+            std::cout << nodeName << "\tOK: object has normals\n";
+        }
+        else {
+            std::cout << nodeName << "\tWarning: object does not have normals\n";
+        }
     }
 }
 
@@ -216,9 +231,7 @@ void Checks::processNode(FbxNode* node) {
 
     numTabs++;
 
-    bool isMesh = true; //true to be able to use logic & on itself
-
-    isMesh = checkAttributes(node);
+    bool isMesh = checkAttributes(node);
 
     if (isMesh && node->GetNodeAttributeCount() != 0) {
         std::cout << "\n-Checking Translation\n";
@@ -231,6 +244,8 @@ void Checks::processNode(FbxNode* node) {
         checkName(node->GetName());
         std::cout << "\n-Checking N-gons\n";
         checkNgons(node);
+        std::cout << "\n-Checking Normals\n";
+        checkNormals(node);
 
         for (int j = 0; j < node->GetChildCount(); j++) {
             processNode(node->GetChild(j));
@@ -239,6 +254,7 @@ void Checks::processNode(FbxNode* node) {
             checkRotation(node->GetChild(j));
             checkName(node->GetChild(j)->GetName());
             checkNgons(node);
+            checkNormals(node);
         }
     }
 
