@@ -17,6 +17,7 @@ public:
 	void checkRotation(FbxNode* node);
 	void checkName(const char* node);
 	void checkNgons(FbxNode* node);
+	void checkTextures(FbxNode* node);
 	void completeCheck(FbxScene* scene);
 
 private:
