@@ -68,16 +68,18 @@ void Checks::checkScaling(FbxNode* pNode) {
     if (scaling[0] == scaling[1] && scaling[0] == scaling[2]) {
 
         // Scale is equal to 1
-        if (scaling[0] == 1 && scaling[1] == 1 && scaling[2] == 1) {
+        if ((scaling[0] <= 1.001 && scaling[0] >= 1)
+            && (scaling[1] <= 1.001 && scaling[1] >= 1)
+            && (scaling[2] <= 1.001 && scaling[2] >= 1)) {
             std::cout << nodeName << ":\tOK\n";
         }
         else {
-            std::cout << nodeName << ":\tWarning: Scale is equal in all axis but differs from unit\n";
+            std::cout << nodeName << ":\tWarning: Scale is equal in all axis but differs from unit= (" << scaling[0] << ", " << scaling[1] << ", " << scaling[2] << ")\n";
             return;
         }
     }
     else {
-        std::cout << nodeName << ":\tNeeds Fixing: Scale is different in axis\n";
+        std::cout << nodeName << ":\tNeeds Fixing: Scale is different in axis= (" << scaling[0] << ", " << scaling[1] << ", " << scaling[2] << ")\n";
         return;
     }
 }
@@ -86,7 +88,10 @@ void Checks::checkTranslation(FbxNode* pNode) {
     const char* nodeName = pNode->GetName();
     FbxDouble3 translation = pNode->LclTranslation.Get();
 
-    if (translation[0] == 0 && translation[1] == 0 && translation[2] == 0) {
+    // Check if the translation is equal 0 in all axis
+    if ((translation[0] <= 0.001 && translation[0] >= -0.001) 
+        && (translation[1] <= 0.001 && translation[1] >= -0.001) 
+        && (translation[2] <= 0.001 && translation[2] >= -0.001)) {
         std::cout << nodeName << ":\tOK\n";
     }
     else {
@@ -180,7 +185,6 @@ void Checks::checkNormals(FbxNode* node) {
 
     //get mesh
     FbxMesh* mesh = node->GetMesh();
-
     if (mesh) {
         FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
 
@@ -189,6 +193,53 @@ void Checks::checkNormals(FbxNode* node) {
         }
         else {
             std::cout << nodeName << "\tWarning: object does not have normals\n";
+        }
+    }
+}
+
+void Checks::checkTextures(FbxNode* node) {
+    for (int i = 0; i < node->GetMaterialCount(); i++) {
+
+        FbxSurfaceMaterial* material = node->GetMaterial(i);
+        FbxProperty prop;
+        int textureIndex;
+
+        FBXSDK_FOR_EACH_TEXTURE(textureIndex) {
+            prop = material->FindProperty(FbxLayerElement::sTextureChannelNames[textureIndex]);
+            if (prop.IsValid()) {
+                int totalTextures = prop.GetSrcObjectCount<FbxTexture>();
+                for (int j = 0; j < totalTextures; ++j) {
+                    FbxLayeredTexture* layeredTexture = prop.GetSrcObject<FbxLayeredTexture>(j);
+                    if (layeredTexture) {
+                        FbxLayeredTexture* layeredTexture = prop.GetSrcObject<FbxLayeredTexture>(j);
+                        int numTextures = layeredTexture->GetSrcObjectCount<FbxTexture>();
+                        for (int k = 0; k < numTextures; ++k) {
+                            FbxTexture* texture = layeredTexture->GetSrcObject<FbxTexture>(k);
+                            if (texture) {
+                                const char* name = texture->GetName();
+                                if (name == "base_color_texture\0")
+                                    std::cout << "Warning: No texture assigned\n";
+                                else
+                                    std::cout << "OK: Layered Texture " << k << "\n";
+                            }
+                        }
+                    }
+
+                    else {
+                        FbxTexture* texture = prop.GetSrcObject<FbxTexture>(j);
+                        if (texture) {
+                            const char* name = texture->GetName();
+                            if (name == "base_color_texture\0")
+                                // For some reason it doesnt enters here xd
+                                std::cout << "Warning: No texture assigned\n";
+
+                            else
+                                std::cout << "OK: Texture " << j << "\n";
+                        }
+                    }
+                }
+
+            }
         }
     }
 }
@@ -246,6 +297,8 @@ void Checks::processNode(FbxNode* node) {
         checkNgons(node);
         std::cout << "\n-Checking Normals\n";
         checkNormals(node);
+        std::cout << "\n-Checking Textures\n";
+        checkTextures(node);
 
         for (int j = 0; j < node->GetChildCount(); j++) {
             processNode(node->GetChild(j));
@@ -253,8 +306,9 @@ void Checks::processNode(FbxNode* node) {
             checkScaling(node->GetChild(j));
             checkRotation(node->GetChild(j));
             checkName(node->GetChild(j)->GetName());
-            checkNgons(node);
-            checkNormals(node);
+            checkNormals(node->GetChild(j));
+            checkNgons(node->GetChild(j));
+            checkTextures(node->GetChild(j));
         }
     }
 

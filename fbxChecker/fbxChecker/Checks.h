@@ -71,8 +71,10 @@ private:
 	*/
 	void checkNormals(FbxNode* node);
 
+	void checkTextures(FbxNode* node);
+
 	/**
-	Runs all the individual check on the given node and its children, and prints information
+	Runs all the individual check on the given node and its children, and prints informationvoid completeCheck(FbxScene* scene);
 
 	@param node (FbxNode*) node that will be checked
 	*/
