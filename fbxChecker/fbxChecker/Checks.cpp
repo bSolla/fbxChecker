@@ -197,6 +197,23 @@ void Checks::checkNormals(FbxNode* node) {
     }
 }
 
+void Checks::checkUVs(FbxNode* node)
+{
+    FbxMesh* mesh = node->GetMesh();
+    FbxStringList lUVSetNameList;
+    mesh->GetUVSetNames(lUVSetNameList);
+    if (lUVSetNameList.GetCount() == 0)
+        std::cout << "Need Fixing: No UVs assigned\n";
+    else
+    {
+        std::cout << "OK: object has UV " << "\n";
+        for (int i = 0; i < lUVSetNameList.GetCount(); i++)
+        {
+            std::cout << "Name UV: "<< lUVSetNameList.GetStringAt(i)<< "\n";
+        }
+    }
+}
+
 void Checks::checkTextures(FbxNode* node) {
     for (int i = 0; i < node->GetMaterialCount(); i++) {
 
@@ -297,6 +314,8 @@ void Checks::processNode(FbxNode* node) {
         checkNgons(node);
         std::cout << "\n-Checking Normals\n";
         checkNormals(node);
+        std::cout << "\n-Checking UVs\n";
+        checkUVs(node);
         std::cout << "\n-Checking Textures\n";
         checkTextures(node);
 
@@ -308,6 +327,7 @@ void Checks::processNode(FbxNode* node) {
             checkName(node->GetChild(j)->GetName());
             checkNormals(node->GetChild(j));
             checkNgons(node->GetChild(j));
+            checkUVs(node->GetChild(j));
             checkTextures(node->GetChild(j));
         }
     }

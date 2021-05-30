@@ -71,6 +71,15 @@ private:
 	*/
 	void checkNormals(FbxNode* node);
 
+
+	/**
+	Checks if the object has UVs, and prints the results of the check
+
+	@param node (FbxNode*) node that will be checked
+	*/
+	void checkUVs(FbxNode* node);
+
+
 	void checkTextures(FbxNode* node);
 
 	/**
