@@ -215,6 +215,13 @@ void Checks::checkUVs(FbxNode* node)
 }
 
 void Checks::checkTextures(FbxNode* node) {
+    if (node->GetMaterialCount() == 0) {
+        std::cout << "Warning: No material assigned, object cannot have texture\n";
+        return;
+    }
+    
+    bool textureExists = false;
+
     for (int i = 0; i < node->GetMaterialCount(); i++) {
 
         FbxSurfaceMaterial* material = node->GetMaterial(i);
@@ -225,41 +232,44 @@ void Checks::checkTextures(FbxNode* node) {
             prop = material->FindProperty(FbxLayerElement::sTextureChannelNames[textureIndex]);
             if (prop.IsValid()) {
                 int totalTextures = prop.GetSrcObjectCount<FbxTexture>();
-                for (int j = 0; j < totalTextures; ++j) {
-                    FbxLayeredTexture* layeredTexture = prop.GetSrcObject<FbxLayeredTexture>(j);
+
+                textureExists |= (totalTextures != 0);
+
+                for (int currentTexture = 0; currentTexture < totalTextures; ++currentTexture) {
+                    FbxLayeredTexture* layeredTexture = prop.GetSrcObject<FbxLayeredTexture>(currentTexture);
+
                     if (layeredTexture) {
-                        FbxLayeredTexture* layeredTexture = prop.GetSrcObject<FbxLayeredTexture>(j);
+                        FbxLayeredTexture* layeredTexture = prop.GetSrcObject<FbxLayeredTexture>(currentTexture);
                         int numTextures = layeredTexture->GetSrcObjectCount<FbxTexture>();
                         for (int k = 0; k < numTextures; ++k) {
                             FbxTexture* texture = layeredTexture->GetSrcObject<FbxTexture>(k);
                             if (texture) {
-                                const char* name = texture->GetName();
-                                if (name == "base_color_texture\0")
-                                    std::cout << "Warning: No texture assigned\n";
-                                else
-                                    std::cout << "OK: Layered Texture " << k << "\n";
+                                std::cout << "OK: Texture of type '" << texture->GetName() << "'\n";
+                            }
+                            else {
+                                std::cout << "Warning: Some textures missing\n";
                             }
                         }
-                    }
-
+                    } // if(layeredTexture)
                     else {
-                        FbxTexture* texture = prop.GetSrcObject<FbxTexture>(j);
+                        FbxTexture* texture = prop.GetSrcObject<FbxTexture>(currentTexture);
                         if (texture) {
-                            const char* name = texture->GetName();
-                            if (name == "base_color_texture\0")
-                                // For some reason it doesnt enters here xd
-                                std::cout << "Warning: No texture assigned\n";
-
-                            else
-                                std::cout << "OK: Texture " << j << "\n";
+                            std::cout << "OK: Texture of type '" << texture->GetName() << "'\n";
                         }
-                    }
-                }
+                        else {
+                            std::cout << "Warning: Some textures missing\n";
+                        }
+                    } // else
+                }// for(texture loop)
+            } // if(prop.isValid())
+        } //FBXSDK_FOR_EACH_TEXTURE
 
-            }
+        if (!textureExists) {
+            std::cout << "Warning: Some textures missing\n";
         }
     }
 }
+
 
 void Checks::completeCheck(FbxScene* scene) {
     FbxNode* rootNode = scene->GetRootNode();
