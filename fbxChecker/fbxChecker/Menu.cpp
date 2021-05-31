@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <stack>
+#include "Output.h"
 //C++17
 namespace fs = std::filesystem;
 
@@ -16,9 +17,9 @@ Menu::~Menu()
 
 void Menu::init()
 {
+	Output::init();
 	//Check the .exe folder and put in a string's stack the fbx object's names
 	std::stack<std::string> s;
-	std::cout << "		-FBX ANALYZER-\n";
 	for (const auto& entry : fs::directory_iterator(fs::current_path().root_name())) {
 		if (entry.path().extension().string() == ".fbx")
 		{
@@ -37,16 +38,6 @@ void Menu::init()
 	{
 		//things for the render
 		loaded += percent;
-		std::cout << "\n------------------------------------------------------\n";
-		std::cout << "		" + s.top() + " \n";
-		std::cout << "------------------------------------------------------\n ";
-
-		//Reader routine
-		if (r->correctFile(s.top().c_str())) {
-			r->processScene();
-			r->clear();
-		}
-
 		//loading interface render
 		std::string load = "";
 		for (int i = 0; i < 50.0f; i++)
@@ -56,7 +47,18 @@ void Menu::init()
 			else
 				load += " ";
 		}
+		std::cout << "		-FBX ANALYZER-\n";
 		std::cout << "\nCHEKING: \n[" + load + "] \n\n";
+
+		//Reader routine
+		if (r->correctFile(s.top().c_str())) {
+			Output::newFbx(s.top());
+			r->processScene();
+			r->clear();
+			Output::endFbx();
+		}
 		s.pop();
+		system("cls");
 	}
+	Output::end();
 }

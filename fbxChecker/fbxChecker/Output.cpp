@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Output.h"
-#include<string>
+#include <string>
 #include <ctime>
 #include <fstream>
 
@@ -73,6 +73,9 @@ void Output::init()
 void Output::newFbx(std::string fbxName)
 {
 	fbxNumber++;
+	problemsInfo = " ";
+	warnings = 0;
+	needToFixes = 0;
 	actualFile += "<div class = \"accordion-item\"> \n <h2 class = \"accordion-header\" id = \"panelsStayOpen-heading" + std::to_string(fbxNumber) + "\"> \n"
 		"<button class = \"accordion-button collapsed\" type = \"button\" data-bs-toggle = \"collapse\" data-bs-target = \"#panelsStayOpen-collapse" + std::to_string(fbxNumber) + "\""
 		"aria-expanded = \"false\" aria-controls = \"panelsStayOpen-collapse" + std::to_string(fbxNumber) + "\"> \n" + fbxName;

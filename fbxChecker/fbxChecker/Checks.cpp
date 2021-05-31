@@ -1,6 +1,8 @@
 #include "Checks.h"
 #include <filesystem>
 #include <fstream>
+#include <string>
+#include "Output.h"
 
 //C++17
 namespace fs = std::filesystem;
@@ -52,10 +54,8 @@ bool Checks::checkAttributes(FbxNode* node) {
         isMesh &= checkAttributes(node->GetChild(j));
     }
 
-    if (isMesh)
-        std::cout << "OK: object does not contain lights\n";
-    else
-        std::cout << "Needs Fixing: object contains a light and/or camera\n";
+    if (!isMesh)
+        Output::newFbxProblem(2, "object contains a light and/or camera");
 
     return isMesh;
 }
@@ -71,15 +71,14 @@ void Checks::checkScaling(FbxNode* pNode) {
         if ((scaling[0] <= 1.001 && scaling[0] >= 1)
             && (scaling[1] <= 1.001 && scaling[1] >= 1)
             && (scaling[2] <= 1.001 && scaling[2] >= 1)) {
-            std::cout << nodeName << ":\tOK\n";
         }
         else {
-            std::cout << nodeName << ":\tWarning: Scale is equal in all axis but differs from unit= (" << scaling[0] << ", " << scaling[1] << ", " << scaling[2] << ")\n";
+            Output::newFbxProblem(1, "Scale is equal in all axis but differs from unit= (" + std::to_string(scaling[0]) + ", " + std::to_string(scaling[1]) + ", " + std::to_string(scaling[2]) + ")");
             return;
         }
     }
     else {
-        std::cout << nodeName << ":\tNeeds Fixing: Scale is different in axis= (" << scaling[0] << ", " << scaling[1] << ", " << scaling[2] << ")\n";
+        Output::newFbxProblem(2, "Scale is different in axis= (" + std::to_string(scaling[0]) + ", " + std::to_string(scaling[1]) + ", " + std::to_string(scaling[2]) + ")");
         return;
     }
 }
@@ -92,10 +91,9 @@ void Checks::checkTranslation(FbxNode* pNode) {
     if ((translation[0] <= 0.001 && translation[0] >= -0.001) 
         && (translation[1] <= 0.001 && translation[1] >= -0.001) 
         && (translation[2] <= 0.001 && translation[2] >= -0.001)) {
-        std::cout << nodeName << ":\tOK\n";
     }
     else {
-        std::cout << nodeName << ":\tWarning: Translation is not equal to zero= (" << translation[0] << ", " << translation[1] << ", " << translation[2] << ")\n";
+        Output::newFbxProblem(1, "Translation is not equal to zero= (" + std::to_string(translation[0]) + ", " + std::to_string(translation[1]) + ", " + std::to_string(translation[2]) + ")");
     }
 }
 
@@ -104,10 +102,9 @@ void Checks::checkRotation(FbxNode* pNode) {
     const char* nodeName = pNode->GetName();
 
     if (abs(rotation[0] - rotation[1]) < 0.01 && abs(rotation[0] - rotation[2]) < 0.01) {
-        std::cout << nodeName << ":\tOK\n";
     }
     else {
-        std::cout << nodeName << ":\tWarning: Rotation is different in some axis= (" << rotation[0] << ", " << rotation[1] << ", " << rotation[2] << ")\n";
+        Output::newFbxProblem(1, "Rotation is different in some axis= (" + std::to_string(rotation[0]) + ", " + std::to_string(rotation[1]) + ", " + std::to_string(rotation[2]) + ")");
     }
 }
 
@@ -133,7 +130,7 @@ void Checks::checkName(const char* nNode) {
     bool actualBadName = false;
     while (!badNamesStack.empty() && !actualBadName) {
         if (name.find(badNamesStack.top()) != std::string::npos) {
-            std::cout << name << ":\tWarning: Bad name, please change it \n";
+            Output::newFbxProblem(1, name + " is a bad name, please change it");
             goodName = false;
             actualBadName = true;
         }
@@ -141,7 +138,6 @@ void Checks::checkName(const char* nNode) {
         badNamesStack.pop();
     }
     if (!actualBadName) {
-        std::cout << name << ":\tGood name \n";
         badName = false;
     }
     while (!saveStack.empty()) {
@@ -169,13 +165,12 @@ void Checks::checkNgons(FbxNode* node) {
 
     switch (maxVertices) {
     case 3:
-        std::cout << nodeName << "\tOK: every polygon is a tri\n";
         break;
     case 4:
-        std::cout << nodeName << "\tWarning: some quads present\n";
+        Output::newFbxProblem(1, "Some quads present");
         break;
     default:
-        std::cout << nodeName << "\tNeeds fixing: there are N-gons in the mesh\n";
+        Output::newFbxProblem(2, " there are N-gons in the mesh");
         break;
     }
 }
@@ -188,11 +183,8 @@ void Checks::checkNormals(FbxNode* node) {
     if (mesh) {
         FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
 
-        if (normalElement) {
-            std::cout << nodeName << "\tOK: object has normals\n";
-        }
-        else {
-            std::cout << nodeName << "\tWarning: object does not have normals\n";
+        if (!normalElement) {
+            Output::newFbxProblem(1 , "object does not have normals");
         }
     }
 }
@@ -203,20 +195,21 @@ void Checks::checkUVs(FbxNode* node)
     FbxStringList lUVSetNameList;
     mesh->GetUVSetNames(lUVSetNameList);
     if (lUVSetNameList.GetCount() == 0)
-        std::cout << "Need Fixing: No UVs assigned\n";
+        Output::newFbxProblem(2, "No UVs assigned");
     else
     {
+        /*
         std::cout << "OK: object has UV " << "\n";
         for (int i = 0; i < lUVSetNameList.GetCount(); i++)
         {
             std::cout << "Name UV: "<< lUVSetNameList.GetStringAt(i)<< "\n";
-        }
+        }*/
     }
 }
 
 void Checks::checkTextures(FbxNode* node) {
     if (node->GetMaterialCount() == 0) {
-        std::cout << "Warning: No material assigned, object cannot have texture\n";
+        Output::newFbxProblem(1, "No material assigned, object cannot have texture");
         return;
     }
     
@@ -243,21 +236,15 @@ void Checks::checkTextures(FbxNode* node) {
                         int numTextures = layeredTexture->GetSrcObjectCount<FbxTexture>();
                         for (int k = 0; k < numTextures; ++k) {
                             FbxTexture* texture = layeredTexture->GetSrcObject<FbxTexture>(k);
-                            if (texture) {
-                                std::cout << "OK: Texture of type '" << texture->GetName() << "'\n";
-                            }
-                            else {
-                                std::cout << "Warning: Some textures missing\n";
+                            if (!texture) {
+                                Output::newFbxProblem(1, "Some textures missing");
                             }
                         }
                     } // if(layeredTexture)
                     else {
                         FbxTexture* texture = prop.GetSrcObject<FbxTexture>(currentTexture);
-                        if (texture) {
-                            std::cout << "OK: Texture of type '" << texture->GetName() << "'\n";
-                        }
-                        else {
-                            std::cout << "Warning: Some textures missing\n";
+                        if (!texture) {
+                            Output::newFbxProblem(1, "Some textures missing");
                         }
                     } // else
                 }// for(texture loop)
@@ -265,7 +252,7 @@ void Checks::checkTextures(FbxNode* node) {
         } //FBXSDK_FOR_EACH_TEXTURE
 
         if (!textureExists) {
-            std::cout << "Warning: Some textures missing\n";
+            Output::newFbxProblem(1, "Some textures missing");
         }
     }
 }
@@ -282,13 +269,11 @@ void Checks::completeCheck(FbxScene* scene) {
             processNode(rootNode->GetChild(i));
         }
 
-        std::cout << "\n-Final name check\n";
+
         if (badName)
-            std::cout << rootNode->GetName() << " child names:\tNeeds Fixing: all the node's names are bad \n";
-        else if (goodName)
-            std::cout << rootNode->GetName() << " child names:\tOK\n";
-        else
-            std::cout << rootNode->GetName() << " child names:\tWarning: some names are names are bad \n";
+            Output::newFbxProblem(2, "all the node's names are bad ");
+        else if (!goodName)
+            Output::newFbxProblem(2, "some names are names are bad ");
     }
 }
 
@@ -300,33 +285,33 @@ void Checks::processNode(FbxNode* node) {
     FbxDouble3 rotation = node->LclRotation.Get();
     FbxDouble3 scaling = node->LclScaling.Get();
 
-    printf("\n<node \nname='%s' translation='(%f, %f, %f)' rotation='(%f, %f, %f)' scaling='(%f, %f, %f)'>\n",
+    /*printf("\n<node \nname='%s' translation='(%f, %f, %f)' rotation='(%f, %f, %f)' scaling='(%f, %f, %f)'>\n",
         nodeName,
         translation[0], translation[1], translation[2],
         rotation[0], rotation[1], rotation[2],
         scaling[0], scaling[1], scaling[2]
-    );
+    );*/
 
     numTabs++;
 
     bool isMesh = checkAttributes(node);
 
     if (isMesh && node->GetNodeAttributeCount() != 0) {
-        std::cout << "\n-Checking Translation\n";
+        //std::cout << "\n-Checking Translation\n";
         checkTranslation(node);
-        std::cout << "\n-Checking Scale\n";
+        //std::cout << "\n-Checking Scale\n";
         checkScaling(node);
-        std::cout << "\n-Checking Rotation\n";
+        //std::cout << "\n-Checking Rotation\n";
         checkRotation(node);
-        std::cout << "\n-Checking Name\n";
+        //std::cout << "\n-Checking Name\n";
         checkName(node->GetName());
-        std::cout << "\n-Checking N-gons\n";
+        //std::cout << "\n-Checking N-gons\n";
         checkNgons(node);
-        std::cout << "\n-Checking Normals\n";
+        //std::cout << "\n-Checking Normals\n";
         checkNormals(node);
-        std::cout << "\n-Checking UVs\n";
+        //std::cout << "\n-Checking UVs\n";
         checkUVs(node);
-        std::cout << "\n-Checking Textures\n";
+        //std::cout << "\n-Checking Textures\n";
         checkTextures(node);
 
         for (int j = 0; j < node->GetChildCount(); j++) {
@@ -345,7 +330,7 @@ void Checks::processNode(FbxNode* node) {
     numTabs--;
     printTabs();
 
-    printf("</node>\n");
+    //printf("</node>\n");
 }
 
 
