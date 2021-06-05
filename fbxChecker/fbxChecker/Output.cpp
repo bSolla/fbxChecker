@@ -56,7 +56,7 @@ Output::endFile =
 "</div> \n"
 "</body> \n"
 "</html> \n",
-Output::actualFile = " ", Output::problemsInfo = " ", Output::date = " ";
+Output::actualFile = " ", Output::problemsInfo = " ";
 
 
 void Output::init()
@@ -64,9 +64,8 @@ void Output::init()
 	warnings = 0;
 	needToFixes = 0;
 	std::time_t now = std::time(0);
-	date = std::ctime(&now);
 	actualFile = initText;
-	actualFile += time_Init + date + span_Finish;
+	actualFile += time_Init + std::ctime(&now) + span_Finish;
 	actualFile += names_Init;
 }
 
@@ -116,7 +115,14 @@ void Output::endFbx()
 void Output::end()
 {
 	actualFile += endFile;
-	std::ofstream outfile("fbxChecker.html");
+	std::time_t now = std::time(0);
+	auto date = std::localtime(&now);
+	std::string name = "fbxChecker_" +	std::to_string(date->tm_mon) + "-" +
+										std::to_string(date->tm_mday) + "_" + 
+										std::to_string(date->tm_hour) + "-" +
+										std::to_string(date->tm_min) + "-" + 
+										std::to_string(date->tm_sec) +".html";
+	std::ofstream outfile(name);
 
 	outfile << actualFile << std::endl;
 
