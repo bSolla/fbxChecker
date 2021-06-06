@@ -54,8 +54,11 @@ bool Checks::checkAttributes(FbxNode* node) {
         isMesh &= checkAttributes(node->GetChild(j));
     }
 
-    if (!isMesh)
-        Output::newFbxProblem(2, "object contains a light and/or camera");
+    if (!isMesh) {
+        std::string f = node->GetName();
+        f += " is a light and/or camera";
+        Output::newFbxProblem(2, f);
+    }
 
     return isMesh;
 }
@@ -68,11 +71,9 @@ void Checks::checkScaling(FbxNode* pNode) {
     if (scaling[0] == scaling[1] && scaling[0] == scaling[2]) {
 
         // Scale is equal to 1
-        if ((scaling[0] <= 1.001 && scaling[0] >= 1)
+        if (!((scaling[0] <= 1.001 && scaling[0] >= 1)
             && (scaling[1] <= 1.001 && scaling[1] >= 1)
-            && (scaling[2] <= 1.001 && scaling[2] >= 1)) {
-        }
-        else {
+            && (scaling[2] <= 1.001 && scaling[2] >= 1))) {
             Output::newFbxProblem(1, "Scale is equal in all axis but differs from unit= (" + std::to_string(scaling[0]) + ", " + std::to_string(scaling[1]) + ", " + std::to_string(scaling[2]) + ")");
             return;
         }
@@ -88,11 +89,9 @@ void Checks::checkTranslation(FbxNode* pNode) {
     FbxDouble3 translation = pNode->LclTranslation.Get();
 
     // Check if the translation is equal 0 in all axis
-    if ((translation[0] <= 0.001 && translation[0] >= -0.001) 
+    if ( !((translation[0] <= 0.001 && translation[0] >= -0.001) 
         && (translation[1] <= 0.001 && translation[1] >= -0.001) 
-        && (translation[2] <= 0.001 && translation[2] >= -0.001)) {
-    }
-    else {
+        && (translation[2] <= 0.001 && translation[2] >= -0.001))) {
         Output::newFbxProblem(1, "Translation is not equal to zero= (" + std::to_string(translation[0]) + ", " + std::to_string(translation[1]) + ", " + std::to_string(translation[2]) + ")");
     }
 }
@@ -101,9 +100,7 @@ void Checks::checkRotation(FbxNode* pNode) {
     FbxDouble3 rotation = pNode->LclRotation.Get();
     const char* nodeName = pNode->GetName();
 
-    if (abs(rotation[0] - rotation[1]) < 0.01 && abs(rotation[0] - rotation[2]) < 0.01) {
-    }
-    else {
+    if (!(abs(rotation[0] - rotation[1]) < 0.01 && abs(rotation[0] - rotation[2]) < 0.01)) {
         Output::newFbxProblem(1, "Rotation is different in some axis= (" + std::to_string(rotation[0]) + ", " + std::to_string(rotation[1]) + ", " + std::to_string(rotation[2]) + ")");
     }
 }
@@ -285,33 +282,18 @@ void Checks::processNode(FbxNode* node) {
     FbxDouble3 rotation = node->LclRotation.Get();
     FbxDouble3 scaling = node->LclScaling.Get();
 
-    /*printf("\n<node \nname='%s' translation='(%f, %f, %f)' rotation='(%f, %f, %f)' scaling='(%f, %f, %f)'>\n",
-        nodeName,
-        translation[0], translation[1], translation[2],
-        rotation[0], rotation[1], rotation[2],
-        scaling[0], scaling[1], scaling[2]
-    );*/
-
     numTabs++;
 
     bool isMesh = checkAttributes(node);
 
     if (isMesh && node->GetNodeAttributeCount() != 0) {
-        //std::cout << "\n-Checking Translation\n";
         checkTranslation(node);
-        //std::cout << "\n-Checking Scale\n";
         checkScaling(node);
-        //std::cout << "\n-Checking Rotation\n";
         checkRotation(node);
-        //std::cout << "\n-Checking Name\n";
         checkName(node->GetName());
-        //std::cout << "\n-Checking N-gons\n";
         checkNgons(node);
-        //std::cout << "\n-Checking Normals\n";
         checkNormals(node);
-        //std::cout << "\n-Checking UVs\n";
         checkUVs(node);
-        //std::cout << "\n-Checking Textures\n";
         checkTextures(node);
 
         for (int j = 0; j < node->GetChildCount(); j++) {
@@ -329,8 +311,6 @@ void Checks::processNode(FbxNode* node) {
 
     numTabs--;
     printTabs();
-
-    //printf("</node>\n");
 }
 
 
