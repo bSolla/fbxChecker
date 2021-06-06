@@ -65,7 +65,7 @@ bool Checks::checkAttributes(FbxNode* node) {
 
 void Checks::checkScaling(FbxNode* pNode) {
     const char* nodeName = pNode->GetName();
-    FbxDouble3 scaling = pNode->LclScaling.Get();
+    fbxsdk::FbxDouble3 scaling = pNode->LclScaling.Get();
 
     // Check if the scale is equal in all axis
     if (scaling[0] == scaling[1] && scaling[0] == scaling[2]) {
@@ -86,7 +86,7 @@ void Checks::checkScaling(FbxNode* pNode) {
 
 void Checks::checkTranslation(FbxNode* pNode) {
     const char* nodeName = pNode->GetName();
-    FbxDouble3 translation = pNode->LclTranslation.Get();
+    fbxsdk::FbxDouble3 translation = pNode->LclTranslation.Get();
 
     // Check if the translation is equal 0 in all axis
     if ( !((translation[0] <= 0.001 && translation[0] >= -0.001) 
@@ -97,7 +97,7 @@ void Checks::checkTranslation(FbxNode* pNode) {
 }
 
 void Checks::checkRotation(FbxNode* pNode) {
-    FbxDouble3 rotation = pNode->LclRotation.Get();
+    fbxsdk::FbxDouble3 rotation = pNode->LclRotation.Get();
     const char* nodeName = pNode->GetName();
 
     // initialized to true to be able to use logic & on itself
@@ -107,7 +107,10 @@ void Checks::checkRotation(FbxNode* pNode) {
 
     for (int i = 0; i < 3; i++) {
         ok &= abs(rotation[i]) < 0.01;
-        exportRotation |= abs((abs(rotation[i]) / 90) - (abs(rotation[i]) / 90.0)) < 0.01;
+        int rotInt = floor(abs(rotation[i]) / 90.0);
+        double rotDou = (abs(rotation[i]) / 90.0);
+        // rotation in the axis != 0 and multiple of 90
+        exportRotation |= abs(rotation[i]) > 0.01 && abs(rotInt - rotDou) < 0.0001;
     }
 
     if (ok) {
@@ -116,7 +119,7 @@ void Checks::checkRotation(FbxNode* pNode) {
         Output::newFbxProblem(1, "Possible residual export rotations= (" + std::to_string(rotation[0]) + ", " + std::to_string(rotation[1]) + ", " + std::to_string(rotation[2]) + ")");
     }
     else {
-        Output::newFbxProblem(1, "Rotation is different in some axis= (" + std::to_string(rotation[0]) + ", " + std::to_string(rotation[1]) + ", " + std::to_string(rotation[2]) + ")");
+        Output::newFbxProblem(2, "Rotation is different in some axis= (" + std::to_string(rotation[0]) + ", " + std::to_string(rotation[1]) + ", " + std::to_string(rotation[2]) + ")");
     }
 }
 
@@ -293,9 +296,9 @@ void Checks::processNode(FbxNode* node) {
     printTabs();
 
     const char* nodeName = node->GetName();
-    FbxDouble3 translation = node->LclTranslation.Get();
-    FbxDouble3 rotation = node->LclRotation.Get();
-    FbxDouble3 scaling = node->LclScaling.Get();
+    fbxsdk::FbxDouble3 translation = node->LclTranslation.Get();
+    fbxsdk::FbxDouble3 rotation = node->LclRotation.Get();
+    fbxsdk::FbxDouble3 scaling = node->LclScaling.Get();
 
     numTabs++;
 
