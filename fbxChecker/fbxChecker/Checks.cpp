@@ -101,7 +101,20 @@ void Checks::checkRotation(FbxNode* pNode) {
     FbxDouble3 rotation = pNode->LclRotation.Get();
     const char* nodeName = pNode->GetName();
 
-    if (abs(rotation[0] - rotation[1]) < 0.01 && abs(rotation[0] - rotation[2]) < 0.01) {
+    // initialized to true to be able to use logic & on itself
+    bool ok = true;
+    // initialized to false to be able to use logic | on itself
+    bool exportRotation = false;
+
+    for (int i = 0; i < 3; i++) {
+        ok &= abs(rotation[i]) < 0.01;
+        exportRotation |= abs((abs(rotation[i]) / 90) - (abs(rotation[i]) / 90.0)) < 0.01;
+    }
+
+    if (ok) {
+    }
+    else if (exportRotation){
+        Output::newFbxProblem(1, "Possible residual export rotations= (" + std::to_string(rotation[0]) + ", " + std::to_string(rotation[1]) + ", " + std::to_string(rotation[2]) + ")");
     }
     else {
         Output::newFbxProblem(1, "Rotation is different in some axis= (" + std::to_string(rotation[0]) + ", " + std::to_string(rotation[1]) + ", " + std::to_string(rotation[2]) + ")");
